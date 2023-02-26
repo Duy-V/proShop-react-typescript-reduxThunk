@@ -1,15 +1,13 @@
 import React from 'react'
 import {Card} from 'react-bootstrap'
-import Rating from "./Rating";
+import Rating from "./Rating"
 import {IProduct} from "../products"
 import {Link} from 'react-router-dom'
-type Props = {
-    product: IProduct,
-}
-function Product({ product }: Props) {
- 
+
+const Product = ({ product }) => {
     return (
    <Card className="my-3 p-3 rounded">
+    <h1></h1>
     <Link to={`/product/${product?._id}`}>
         <Card.Img src={product.image}/>
     </Link>

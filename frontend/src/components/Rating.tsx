@@ -1,10 +1,10 @@
 import React from "react";
 
 type Props = {
-  value: number;
-  text: string;
-  color: string;
-};
+  value: number,
+  text: string,
+  color: string
+}
 export default function Rating({ value, text, color }: Props) {
   return (
     <div className="rating">

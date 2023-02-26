@@ -5,8 +5,12 @@ import "./bootstrap.min .css"
 import './index.css'
 import HomeScreen from "./screens/HomeScreen";
 import ProductScreen from "./screens/ProductScreen";
-import ErrorPage from "./ErrorPage";
+import CartScreen from "./screens/CartScreen";
 
+// import Product from "./components/Product"
+import ErrorPage from "./ErrorPage";
+import{Provider} from 'react-redux'
+import {store} from './store'
 import {
   createBrowserRouter,
   RouterProvider,
@@ -27,25 +31,22 @@ const router = createBrowserRouter([
         path: "/",
         element: <HomeScreen />,
       },
-      { path: "/product/:id", element: <ProductScreen /> },
+      { path: "/product/:productId", element: <ProductScreen /> , 
+    },
+    { path: "/cart/:productId", element: <CartScreen /> , 
+  
+  },
 
-      // {
-      //   path: "/list-products",
-      //   element: <ListProducts />,
-      //   children: [],
-      // },
 
-      // {
-      //   path: "/cart-page",
-      //   element: <CartPage />,
-      // }
     ],
   }
 ]);
 
 
 ReactDOM.createRoot(document.getElementById('root') as HTMLElement).render(
+<Provider store={store}>
 
   <RouterProvider router={router} />
+</Provider>
 
 )
