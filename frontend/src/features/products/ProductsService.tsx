@@ -34,7 +34,6 @@ const getProduct = async (productId: string, token: string) => {
       Authorization: `Bearer ${token}`,
     },
   };
-  console.log(API_URL);
   const response = await axios.get(`${API_URL}${productId}`, config);
 
   return response.data;

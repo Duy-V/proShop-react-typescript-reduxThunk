@@ -29,6 +29,7 @@ const ProductScreen: React.FC<IInitialState> = (params)=> {
     }
   }, [dispatch])
 const addToCartHandler = (): void => {
+  
   navigate(`/cart/${productId}?qty=${qty}`);
 }
   return (
