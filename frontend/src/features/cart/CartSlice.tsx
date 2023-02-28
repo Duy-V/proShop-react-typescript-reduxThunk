@@ -11,7 +11,7 @@ interface FetchProductParams {
   productId: string;
 }
 export interface IInitialState  {
-  products: IProduct[],
+  cartItems: IProduct[],
   product: IProduct| null,
   isError: boolean,
   isSuccess: boolean,
@@ -20,7 +20,7 @@ export interface IInitialState  {
 }
 
 const initialState: IInitialState = {
-  products:[],
+  cartItems:[],
   product: null,
   isError: false,
   isSuccess: false,
@@ -60,15 +60,16 @@ const token =
 
 
 export const addItemToCart = createAsyncThunk<AppThunk<{productId: string,qty: number } >>(
-  "selectedProduct/get",
+  "addItemToCart/get",
   async ({productId, qty}, thunkAPI) => {
     try {
+console.log(productId, qty)
       // const token = thunkAPI.getState().auth.user.token;
       const data= await CartService.addToCart(productId, token);
-     const  selectedTicket= {...data, qty}
-   localStorage.setItem('cartItems', JSON.stringify(selectedTicket))
+     const  selectedItem= {...data, qty}
+    //  localStorage.setItem('cartItems', JSON.stringify(thunkAPI.getState().cart.cartItems))
 
-      return selectedTicket;
+      return selectedItem;
     } catch (error) {
 console.log(error)
       // return thunkAPI.rejectWithValue(error.message);
@@ -133,11 +134,16 @@ console.log(error)
 
 export const CartSlice = createSlice({
   name: "products",
-  // `createSlice` will infer the state type from the `initialState` argument
   initialState,
   reducers: {
   
-
+  removeFromCart: (state, action: PayloadAction<string>) => {
+    const cartItemId = action.payload
+    const foundPostIndex = state.cartItems.findIndex((cartItem) => cartItem._id === cartItemId)
+    if (foundPostIndex !== -1) {
+      state.cartItems.splice(foundPostIndex, 1)
+    }
+  },
   },
   extraReducers: (builder) => {
     builder
@@ -146,8 +152,27 @@ export const CartSlice = createSlice({
     })
     .addCase(addItemToCart.fulfilled, (state, action: PayloadAction<any>) => {
       state.isLoading = false
-      state.products = action.payload
+      let newState = {...state}
+      // state.cartItems = action.payload
+    const item =action.payload
 
+      const existItem = state.cartItems.find((x) => x._id === item._id)
+
+      if (existItem) {
+        newState = {
+          ...state,
+          cartItems: state.cartItems.map((x) =>
+            x._id === existItem._id ? item : x
+          ),
+        }
+      } else {
+        newState = {
+          ...state,
+          cartItems: [...state.cartItems, item],
+        }
+        console.log(newState)
+      }
+state.cartItems = newState.cartItems
     })
     // .addCase(addItemToCart.rejected, (state, action: PayloadAction<any>) => {
     //   state.isLoading = false
@@ -159,15 +184,11 @@ export const CartSlice = createSlice({
 });
 
 export const {
-  // addToCart,
-  // deleteProduct,
-  // updateProduct,
-
-  
+  removeFromCart
 } = CartSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
-export const cartItems = (state: RootState) => state.products;
+export const selectCartItems = (state: RootState) => state.cart.cartItems;
 // export const productDetails = (state: RootState) => state.products.product;
 
 export default CartSlice.reducer;

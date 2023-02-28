@@ -12,12 +12,12 @@ cart: cartReducer
 },
 // initialState
 })
-const cartItemsFromStorage = localStorage.getItem('cartItems')
-  ? JSON.parse(localStorage.getItem('cartItems'))
-  : []
+// const cartItemsFromStorage = localStorage.getItem('cartItems')
+//   ? JSON.parse(localStorage.getItem('cartItems'))
+//   : []
   const initialState = {
     cart: {
-      cartItems: cartItemsFromStorage,
+      cartItems: [],
     }
   }
 // Optional, nhưng bắt buộc nếu dùng tính năng refetchOnFocus/refetchOnReconnect

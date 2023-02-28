@@ -1,10 +1,10 @@
-import React from 'react'
+import {PropsWithChildren} from 'react'
 import { Alert } from 'react-bootstrap'
 type Props = {
   variant: string,
-  children: string
+ 
 }
-const Message = ({ variant, children }: Props) => {
+const Message = ({ variant, children }: PropsWithChildren<Props>) => {
   return <Alert variant={variant}>{children}</Alert>
 }
 

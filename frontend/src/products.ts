@@ -9,6 +9,7 @@ export interface IProduct {
   countInStock: number;
   rating: number;
   numReviews: number;
+  qty?: string 
 }
 export const productsList: IProduct[] = [
   {
