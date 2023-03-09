@@ -36,8 +36,6 @@ interface ThunkAPI {
 export type AppThunk<ReturnType = void> = (
   thunkAPI: ThunkAPI
 ) => ReturnType;
-const token =
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzZjFmMDY5ZGEwYTVkMTQ1YzcwZjAyMiIsImlhdCI6MTY3NzA0OTc5MSwiZXhwIjoxNjc5NjQxNzkxfQ.s76EoM9oatj1L_IUIEI5Yge1PKo37yzz935Jx1PHsaY";
 
 
 //getall
@@ -45,12 +43,11 @@ export const getProductList = createAsyncThunk(
   "products/getAll",
   async (_, thunkAPI) => {
     try {
-      // const token = thunkAPI.getState().auth.user.token;
+      const token = thunkAPI.getState().users.userInfo.token
       const data = await ProductsService.getProducts(token);
       return data.products;
     } catch (error) {
-      console.log(error);
-      // return thunkAPI.rejectWithValue(error.message)
+      // return thunkAPI.rejectWithValue(error)
     }
   }
 );
@@ -62,7 +59,7 @@ export const getProductItem = createAsyncThunk<AppThunk<{productId: string }>>(
   "product/get",
   async ({productId}, thunkAPI) => {
     try {
-      // const token = thunkAPI.getState().auth.user.token;
+      const token = thunkAPI.getState().users.userInfo.token;
       const selectedTicket = await ProductsService.getProduct(productId, token);
       return selectedTicket;
     } catch (error) {

@@ -3,23 +3,28 @@ import { setupListeners } from '@reduxjs/toolkit/dist/query'
 import usersReducer from "./features/users/UsersSlice"
 import productsReducer from "./features/products/ProductsSlice"
 import cartReducer from "./features/cart/CartSlice"
+import orderReducer from "./features/order/OrderSlice"
+
+// import userRegisterReducer from "./features/register/UserRegisterSlice"
+import { IProduct, productsList } from "./products";
+
+
+
+// load string from localStarage and convert into an Object
+// invalid output must be undefined
 
 export const store = configureStore({
   reducer: {
-    users: usersReducer,
+    users: usersReducer ,
 products: productsReducer,
-cart: cartReducer
+cart: cartReducer,
+order: orderReducer
+// userRegister: userRegisterReducer,
 },
-// initialState
+// loadFromLocalStorage()
+
 })
-// const cartItemsFromStorage = localStorage.getItem('cartItems')
-//   ? JSON.parse(localStorage.getItem('cartItems'))
-//   : []
-  const initialState = {
-    cart: {
-      cartItems: [],
-    }
-  }
+
 // Optional, nhưng bắt buộc nếu dùng tính năng refetchOnFocus/refetchOnReconnect
 setupListeners(store.dispatch)
 

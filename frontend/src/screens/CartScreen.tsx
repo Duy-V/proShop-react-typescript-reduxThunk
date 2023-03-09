@@ -11,41 +11,43 @@ import {
   Card,
 } from "react-bootstrap";
 import Message from "../components/Message";
-import { addItemToCart,removeFromCart } from "../features/cart/CartSlice";
+import { addItemToCart, removeFromCart } from "../features/cart/CartSlice";
 import {
   getProductItem,
   IInitialState,
 } from "../features/products/ProductsSlice";
-import { useParams, useSearchParams ,useNavigate} from "react-router-dom";
+import { useParams, useSearchParams, useNavigate } from "react-router-dom";
 import { selectCartItems } from "../features/cart/CartSlice";
-
+import { userLogin } from "../features/users/UsersSlice";
 
 const CartScreen: React.FC<IInitialState> = () => {
   let { productId } = useParams();
-  const dispatch = useDispatch()
-const navigate = useNavigate()
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  let qty = searchParams.get("qty");
-  console.log(typeof qty, productId);
+  let qty = +searchParams.get("qty");
+  const cartItems = useSelector(selectCartItems).cartItems;
+ console.log(cartItems)
+  const loginSuccess = useSelector(userLogin).userInfo;
 
-
-  const cartItems = useSelector(selectCartItems);
   useEffect(() => {
     if (productId) {
       dispatch(addItemToCart({ productId, qty }));
     }
   }, [dispatch]);
 
-  // const handleChangeQty = (itemId: string, qtyOfItem: string) => { 
+  // const handleChangeQty = (itemId: string, qtyOfItem: string) => {
   //   dispatch(addItemToCart( itemId,qtyOfItem ));
   // };
-const removeFromCartHandler = (itemId: string) => {
-  dispatch(removeFromCart(itemId))
-}
-const checkoutHandler = () => {
-  navigate.push('/login?redirect=shipping')
-}
+  const removeFromCartHandler = (itemId: string) => {
+    dispatch(removeFromCart(itemId));
+  };
+  const checkoutHandler = () => {
+    if (loginSuccess) {
+      navigate("/shipping");
+    }
+  };
   return (
     <Row>
       <Col md={8}>
@@ -70,11 +72,11 @@ const checkoutHandler = () => {
                     <Form.Control
                       as="select"
                       value={item?.qty}
-                      // onChange={() =>  
-                        // dispatch(
-                        //   addToCart(item.product, Number(e.target.value))
-                        // )                      
-                          // handleChangeQty(item?._id, e.target.value)                        
+                      // onChange={() =>
+                      // dispatch(
+                      //   addToCart(item.product, Number(e.target.value))
+                      // )
+                      // handleChangeQty(item?._id, e.target.value)
                       // }
                     >
                       {[...Array(item?.countInStock).keys()].map((x) => (
@@ -105,12 +107,11 @@ const checkoutHandler = () => {
             <ListGroup.Item>
               <h2>
                 Subtotal (
-                {cartItems.reduce((acc, item) => acc + parseInt(item?.qty), 0)})
+                {cartItems?.reduce((acc, item) => acc + parseInt(item?.qty), 0)})
                 items
               </h2>
               $
-              {cartItems
-                .reduce(
+              {cartItems?.reduce(
                   (acc, item) => acc + parseInt(item?.qty) * item.price,
                   0
                 )

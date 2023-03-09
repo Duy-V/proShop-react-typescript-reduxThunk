@@ -13,47 +13,13 @@ const addToCart = async (productId: IProduct, token: string) => {
     },
   };
   const response = await axios.get(`${API_URL}${productId}`, config);
+  
   return response.data;
 
 };
 
-// Get user tickets
-// const getCart = async (token: string) => {
-//   const config = {
-//     headers: {
-//       Authorization: `Bearer ${token}`,
-//     },
-//   };
 
-//   const response = await axios.get(API_URL, config);
 
-//   return response.data;
-// };
-
-// const getItemCart = async (productId: string, token: string) => {
-//   const config = {
-//     headers: {
-//       Authorization: `Bearer ${token}`,
-//     },
-//   };
-//   console.log(API_URL);
-//   const response = await axios.get(`${API_URL}${productId}`, config);
-
-//   return response.data;
-// };
-
-// const deleteItemCart = async (productId: string, token: string) => {
-//   console.log(productId, "service");
-//   const config = {
-//     headers: {
-//       Authorization: `Bearer ${token}`,
-//     },
-//   };
-//   const response = await axios.delete(`${API_URL}${productId}`, config);
-//   return response.data;
-// };
-
-//ticket.product, ticket.product, ticket._id
 
 
 

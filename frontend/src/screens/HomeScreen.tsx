@@ -13,6 +13,8 @@ const HomeScreen: React.FC<IInitialState> = (params)=> {
   const productsListHome = useSelector(selectProducts);
 const {isError, isLoading, products, message } = productsListHome
   const dispatch = useDispatch<any>();
+
+
 useEffect(()=>{
   dispatch(getProductList())
 },[dispatch])

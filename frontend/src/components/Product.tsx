@@ -3,8 +3,10 @@ import {Card} from 'react-bootstrap'
 import Rating from "./Rating"
 import {IProduct} from "../products"
 import {Link} from 'react-router-dom'
-
-const Product = ({ product }) => {
+type Props = {
+    product: IProduct
+}
+const Product = ({ product }: Props) => {
     return (
    <Card className="my-3 p-3 rounded">
     <h1></h1>
