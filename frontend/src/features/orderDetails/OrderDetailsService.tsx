@@ -24,8 +24,8 @@ export interface IInitialOrder {
 
 
 
-const createOrder = async (orderDispatch: IInitialOrder, token: string) => {
-    console.log(orderDispatch)
+const getOrder = async (orderId: string, token: string) => {
+    console.log(orderId)
     const config = {
         headers: {
           'Content-Type': 'application/json',
@@ -33,19 +33,16 @@ const createOrder = async (orderDispatch: IInitialOrder, token: string) => {
         },
       }
 
-  const { data } = await axios.post(`${API_URL}`, orderDispatch, config)
+  const { data } = await axios.get(`${API_URL}${orderId}`, config)
   
   return data;
 
 };
 
 
-const OrderService = {
-  createOrder,
-  // getCart,
-  // getItemCart,
-  // // closeProduct,
-  // deleteItemCart,
+const OrderDetailsService = {
+ getOrder
+
 };
 
-export default OrderService;
+export default OrderDetailsService;

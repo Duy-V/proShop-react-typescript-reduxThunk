@@ -11,7 +11,8 @@
     "dev": "concurrently \"npm run server\" \"npm run client\"",
     "data:import": "node backend/seeder",
     "data:destroy": "node backend/seeder -d",
-    "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix frontend && npm run build --prefix frontend"
+    "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install --prefix frontend && npm run build --prefix frontend",
+    "start-dev": "nodemon app.js"
   },
   "author": "Brad Traversy",
   "license": "MIT",
@@ -33,6 +34,7 @@
   },
   "devDependencies": {
     "concurrently": "^5.3.0",
+    "kill-port": "^2.0.1",
     "nodemon": "^2.0.20"
   }
 }

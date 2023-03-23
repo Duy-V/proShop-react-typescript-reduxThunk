@@ -16,7 +16,9 @@ export interface IInitialState  {
   isError: boolean,
   isSuccess: boolean,
   isLoading: boolean,
-  message: string
+  message: string,
+  page:number,
+  pages:number
 }
 
 const initialState: IInitialState = {
@@ -25,7 +27,9 @@ const initialState: IInitialState = {
   isError: false,
   isSuccess: false,
   isLoading: false,
-  message: ''
+  message: '',
+  page:0,
+  pages:0
 }
 type Dispatch = /*unresolved*/ any
 interface ThunkAPI {
@@ -41,11 +45,11 @@ export type AppThunk<ReturnType = void> = (
 //getall
 export const getProductList = createAsyncThunk(
   "products/getAll",
-  async (_, thunkAPI) => {
+  async ({keyword,pageNumber}, thunkAPI) => {
+    console.log(pageNumber)
     try {
-      const token = thunkAPI.getState().users.userInfo.token
-      const data = await ProductsService.getProducts(token);
-      return data.products;
+      const data:any = await ProductsService.getProducts(keyword,pageNumber);
+      return data;
     } catch (error) {
       // return thunkAPI.rejectWithValue(error)
     }
@@ -58,10 +62,12 @@ export const getProductList = createAsyncThunk(
 export const getProductItem = createAsyncThunk<AppThunk<{productId: string }>>(
   "product/get",
   async ({productId}, thunkAPI) => {
+    console.log('id', productId);
     try {
       const token = thunkAPI.getState().users.userInfo.token;
-      const selectedTicket = await ProductsService.getProduct(productId, token);
-      return selectedTicket;
+      const data = await ProductsService.getProduct(productId, token);
+      console.log(data)
+      return data;
     } catch (error) {
 console.log(error)
       // return thunkAPI.rejectWithValue(error.message);
@@ -86,43 +92,43 @@ console.log(error)
 // );
 
 // //put item
-// export const updateProduct = createAppAsyncThunk(
-//   "tickets/update",
-//   async (updateProductData: IProduct, thunkAPI) => {
-//     // console.log(ticketId)
-//     try {
-//       // const token: string = thunkAPI.getState().auth.user.token;
-//       const updateNote = await ProductsService.updateProduct(
-//         updateProductData,
-//         token
-//       );
-//       thunkAPI.dispatch(getProducts(token));
-//       return updateNote;
-//     } catch (error) {
-//       console.log(error);
+export const updateProduct = createAsyncThunk(
+  "update/product",
+  async (updateProductData: IProduct, thunkAPI) => {
+    // console.log(ticketId)
+    try {
+      const token = thunkAPI.getState().users.userInfo.token;
+      const updateNote = await ProductsService.updateProduct(
+        updateProductData,
+        token
+      );
+      thunkAPI.dispatch(getProducts(token));
+      return updateNote;
+    } catch (error) {
+      console.log(error);
 
-//       // return thunkAPI.rejectWithValue(extractErrorMessage(error))
-//     }
-//   }
-// );
+      // return thunkAPI.rejectWithValue(extractErrorMessage(error))
+    }
+  }
+);
 
-//delte item
-// export const deleteProduct = createAsyncThunk(
-//   "tickets/delete",
-//   async (productData, thunkAPI) => {
-//     console.log("slice", productData._id);
-//     try {
-//       // const token = thunkAPI.getState().auth.user.token;
-//       const ticket = await ProductsService.deleteTicket(productData._id, token);
-//       thunkAPI.dispatch(getProducts(token));
-//       return ticket;
-//     } catch (error) {
-//       console.log(error);
+// delte item
+export const deleteProduct = createAsyncThunk(
+  "delete/product",
+  async (id: string, thunkAPI) => {
+    console.log("slice", id);
+    try {
+      const token = thunkAPI.getState().users.userInfo.token;
+      const ticket = await ProductsService.deleteProduct(id, token);
+      thunkAPI.dispatch(getProductList("",1));
+      return ticket;
+    } catch (error) {
+      console.log(error);
 
-//       // return thunkAPI.rejectWithValue(extractErrorMessage(error))
-//     }
-//   }
-// );
+      // return thunkAPI.rejectWithValue(extractErrorMessage(error))
+    }
+  }
+);
 
 export const ProductsSlice = createSlice({
   name: "products",
@@ -136,9 +142,11 @@ export const ProductsSlice = createSlice({
     .addCase(getProductList.pending, (state) => {
       state.isLoading = true
     })
-    .addCase(getProductList.fulfilled, (state, action: PayloadAction<IProduct[]>) => {
+    .addCase(getProductList.fulfilled, (state, action: PayloadAction<any>) => {
       state.isLoading = false
-      state.products = action.payload
+      state.products = action.payload.products
+      state.page = action.payload.page
+      state.pages = action.payload.pages
     })
     .addCase(getProductList.rejected, (state, action: PayloadAction<any>) => {
       state.isLoading = false
@@ -157,16 +165,24 @@ export const ProductsSlice = createSlice({
       state.isError = true
       state.message = action.payload
     })
+    .addCase(deleteProduct.pending, (state) => {
+      state.isLoading = true
+    })
+    .addCase(deleteProduct.fulfilled, (state, action: PayloadAction<any>) => {
+      state.isLoading = false
+      state.product = action.payload
+      state.isSuccess = true
+    })
+    .addCase(deleteProduct.rejected, (state, action: PayloadAction<any>) => {
+      state.isLoading = false
+      state.isError = true
+      state.isSuccess = false
+      state.message = action.payload
+    })
   },
 });
 
-export const {
-  // createProduct,
-  // deleteProduct,
-  // updateProduct,
 
-  
-} = ProductsSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
 export const selectProducts = (state: RootState) => state.products;

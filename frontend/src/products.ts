@@ -9,7 +9,14 @@ export interface IProduct {
   countInStock: number;
   rating: number;
   numReviews: number;
-  qty?: string 
+  qty?: string ;
+  reviews?: {
+    rating: number;
+    comment:string;
+    name: string;
+    _id: string;
+    createdAt: string
+  }[] 
 }
 export const productsList: IProduct[] = [
   {

@@ -5,7 +5,9 @@ import { productsList, IProduct } from "../../products";
 interface FetchUsertParams {
   email: string;
   password: string;
+  name?: string
 }
+
 const login = async (account: FetchUsertParams) => {
   const response = await axios.post(API_URL, {
     email: account.email,
@@ -16,12 +18,10 @@ const login = async (account: FetchUsertParams) => {
 };
 
 
-
-
 const UsersService = {
   login,
-  
-  // createAccount,
+
+
 };
 
 export default UsersService;

@@ -1,6 +1,6 @@
 import type { PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "../../store";
-import UserRegisterService from "./UserRegisterService";
+import UserUpdateService from "./UserUpdateService";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { useSelector } from "react-redux";
 
@@ -14,8 +14,7 @@ export interface userData {
   _id: string,
   name: string,
   email: string,
-  isAdmin: boolean,
-  token: string
+  isAdmin: boolean
  }
 export interface UsersState {
   isLoading: boolean;
@@ -32,12 +31,13 @@ const initialState = {
   userInfo: null,
 };
 
-export const createAccount = createAsyncThunk(
+export const updateUser = createAsyncThunk(
   "createAccount/post",
-  async (account: userInfo, thunkAPI) => {
+  async (account: userData, thunkAPI) => {
     console.log(account)
     try {
-      const data = await UserRegisterService.createNewUser(account);
+      const token = thunkAPI.getState().users.userInfo.token;
+      const data = await UserUpdateService.updateUser(account, token);
       console.log(data);
       return data;
     } catch (error: any) {
@@ -48,25 +48,27 @@ export const createAccount = createAsyncThunk(
 );
 
 
-export const UserRegisterSlice = createSlice({
-  name: "userRegister",
+export const UserUpdateSlice = createSlice({
+  name: "UserUpdate",
   // `createSlice` will infer the state type from the `initialState` argument
   initialState ,
   reducers: {
-   
+    userUpdateReset: (state) => {
+state.isSuccess = false
+state.userInfo = null
+    }
   },
   extraReducers: (builder) => {
     builder
-      .addCase(createAccount.pending, (state) => {
+      .addCase(updateUser .pending, (state) => {
         state.isLoading = true;
       })
-      .addCase(createAccount.fulfilled, (state, action: PayloadAction<any>) => {
+      .addCase(updateUser .fulfilled, (state, action: PayloadAction<any>) => {
         state.isLoading = false;
         state.userInfo = action.payload;
-        localStorage.setItem("userInfo", JSON.stringify(state.userInfo));
         state.isSuccess = true
       })
-      .addCase(createAccount.rejected, (state, action: PayloadAction<any>) => {
+      .addCase(updateUser .rejected, (state, action: PayloadAction<any>) => {
         state.isLoading = false;
         // state.isError = true;
         // state.message = action.payload;
@@ -74,8 +76,9 @@ export const UserRegisterSlice = createSlice({
   },
 });
 
+export const { userUpdateReset } = UserUpdateSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
-export const userRegister = (state: RootState) => state.userRegister;
+export const userUpdateInfo = (state: RootState) => state.userUpdate;
 
-export default UserRegisterSlice.reducer;
+export default UserUpdateSlice.reducer;

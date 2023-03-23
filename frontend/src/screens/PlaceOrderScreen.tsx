@@ -8,13 +8,25 @@ import { selectCartItems } from "../features/cart/CartSlice";
 import { createOrder, selectOrder } from "../features/order/OrderSlice";
 import { IProduct, productsList } from "../products";
 import { useParams, useNavigate } from "react-router-dom";
-
+import {
+  userLogin
+} from "../features/users/UsersSlice";
+export interface IOrderItem {
+  image: string,
+  name: string,
+  price: number,
+  qty:  number,
+  product: {
+      _id: string
+  }
+}
 const PlaceOrderScreen = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
+const userInfo = useSelector(userLogin).userInfo
   let cart = useSelector(selectCartItems);
-
+let newCart = cart.cartItems.map(item=>({...item, product: {_id: item._id}}))
+console.log(newCart)
   if (!cart?.shippingAddress?.address) {
     navigate("/shipping");
   } else if (!cart?.paymentMethod) {
@@ -25,7 +37,7 @@ const PlaceOrderScreen = () => {
   };
   
 let x=addDecimals(
-  cart.cartItems.reduce((acc: number, item: IProduct) => acc + item.price * (+item?.qty), 0)
+  cart?.cartItems?.reduce((acc: number, item: IProduct) => acc + item.price * (+item?.qty), 0)
 );
 console.log(x)
   cart =  {...cart, itemsPrice: +x}
@@ -41,27 +53,38 @@ console.log(x)
   
 
   const orderCreate = useSelector(selectOrder);
-  let { order, success, error } = orderCreate;
-  order = {...order,orderItems: cart.cartItems,
+  let { order, success, error} = orderCreate;
+  console.log(order)
+  const orderDispatch = {orderItems: newCart,
   shippingAddress: cart.shippingAddress,
   paymentMethod: cart.paymentMethod,
   itemsPrice: cart.itemsPrice,
   shippingPrice: cart.shippingPrice,
   taxPrice: cart.taxPrice,
-  totalPrice: cart.totalPrice, }
-  console.log(order)
+  totalPrice: cart.totalPrice,
+  paidAt:"",
+  user: userInfo.email,
+  isPaid: false,
+  isDelivered: false }
+ 
+
   useEffect(() => {
+    console.log('remote to order pay',success)
+
     if (success) {
-      // navigate(`/order/${order._id}`)
+    // console.log('remote to order pay', order?._id)
+
+      navigate(`/order/${order?._id}`)
+      console.log('remote to order pay')
       // dispatch({ type: USER_DETAILS_RESET })
       // dispatch({ type: ORDER_CREATE_RESET })
   }
     // eslint-disable-next-line
-  }, [navigate, success]);
+  }, [navigate, success,order]);
 
   const placeOrderHandler = () => {
     dispatch(
-      createOrder({order})
+      createOrder({orderDispatch})
     );
   };
 
@@ -105,12 +128,12 @@ console.log(x)
                           />
                         </Col>
                         <Col>
-                          <Link to={`/product/${item.product}`}>
+                          <Link to={`/product/${item?.product?._id}`}>
                             {item.name}
                           </Link>
                         </Col>
                         <Col md={4}>
-                          {item.qty} x ${item.price} = ${item.qty * item.price}
+                          {item.qty} x ${item.price} = ${(parseInt(item?.qty)) * item.price}
                         </Col>
                       </Row>
                     </ListGroup.Item>
@@ -157,7 +180,7 @@ console.log(x)
                 <Button
                   type="button"
                   className="btn-block"
-                  disabled={cart.cartItems === 0}
+                  disabled={cart?.cartItems?.length === 0}
                   onClick={placeOrderHandler}
                 >
                   Place Order

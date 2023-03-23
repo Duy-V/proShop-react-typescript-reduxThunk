@@ -2,7 +2,8 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "../../store";
 import { IProduct, productsList } from "../../products";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import OrderService from "./OrderService";
+import OrderDetailsService from "./OrderDetailsService";
+import { AppDispatch } from "../../store";
 // import { extractErrorMessage } from '../../utils'
 
 // Define a type for the slice state
@@ -27,7 +28,12 @@ export interface IOrderItem {
       _id: string
   }
 }
-
+export interface userInfo {
+  _id: string;
+  name: string;
+  isAdmin?: boolean;
+  email: string;
+}
 export interface IInitialOrder {  
   
       orderItems: IOrderItem[] | [];
@@ -37,31 +43,36 @@ export interface IInitialOrder {
         postalCode: string;
         country: string;
       } | null;
+      user: userInfo,
       paymentMethod: string | null;
       itemsPrice: number | null;
       shippingPrice: number | null;
       taxPrice: number | null;
-      totalPrice: number | null; 
-      paidAt?:string,
-      user?: string,
-      isPaid?: boolean,
-      isDelivered?: boolean,
-      _id?: string,
+      totalPrice: number | null;
+      isPaid: boolean,
+      isDelivered: boolean,
+      _id: string,
     };
- 
+  
 export interface IInitialOrderState {   
   order: IInitialOrder| null
-  success: boolean;
-  error: string;
- 
+  isSuccess: boolean;
+  isError: boolean;
+  isLoading: boolean;
+
 }
+
+
+    
 export type AppThunk<ReturnType = void> = (thunkAPI: ThunkAPI) => ReturnType;
 
 
-const initialState: IInitialOrderState= {  
+const initialState: IInitialOrderState = {  
   order: null,
-  success: false,
-  error: "",
+  isSuccess: false,
+  isError: false,
+  isLoading: false
+
 };
 type Dispatch = /*unresolved*/ any;
 interface ThunkAPI {
@@ -69,45 +80,46 @@ interface ThunkAPI {
   getState: () => RootState;
 }
 
-export const createOrder = createAsyncThunk<
-  AppThunk<{ orderDispatch: IInitialOrder; qty: number }>
->("createOrder/post", async ({ orderDispatch }, thunkAPI) => {
-  console.log("orderdispatch",orderDispatch)
+export const getOrderDetails = createAsyncThunk<
+  AppThunk<{ orderId: string}>
+>("getOrderDetails123/get", async ({ orderId }, thunkAPI) => {
+    console.log(orderId)
   try {
     const token = thunkAPI.getState().users.userInfo.token;
-    const data = await OrderService.createOrder(orderDispatch, token);
-
+    const data = await OrderDetailsService.getOrder(orderId, token);
+  
+console.log(data)
     return data;
   } catch (error) {
-
-    return thunkAPI.rejectWithValue(error);
+    console.log(error);
+    // return thunkAPI.rejectWithValue(error.message);
   }
 });
 
-export const OrderSlice = createSlice({
-  name: "order/create",
+export const OrderDetailsSlice = createSlice({
+  name: "orderDetails",
   initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(createOrder.fulfilled, (state, action: PayloadAction<any>) => {
-        console.log(action.payload)
-        state.success = true
+      .addCase(getOrderDetails.pending, (state) => {})
+      .addCase(getOrderDetails.fulfilled, (state, action: PayloadAction<any>) => {
         state.order = action.payload;
-        
-
+        state.isLoading = false;
+        state.isSuccess = true
       })
-      .addCase(createOrder.rejected, (state, action: PayloadAction<any>) => {
-        
-
+      .addCase(getOrderDetails.rejected, (state, action: PayloadAction<any>) => {
+  
+        state.isSuccess = false;
+        state.isError = action.payload;
       });
   },
 });
 
-export const {} = OrderSlice.actions;
+export const {} = OrderDetailsSlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
-export const selectOrder = (state: RootState) => state.order;
+export const orderDetailsInfo = (state: RootState) => state.orderDetails;
 // export const productDetails = (state: RootState) => state.products.product;
 
-export default OrderSlice.reducer;
+export default OrderDetailsSlice.reducer;

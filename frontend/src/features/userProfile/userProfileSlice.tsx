@@ -1,6 +1,6 @@
 import type { PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "../../store";
-import UsersService from "./UsersService";
+import UserProfileService from "./UserProfileService";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { useSelector } from "react-redux";
 
@@ -18,7 +18,7 @@ export interface UsersState {
   isSuccess?: boolean;
   message?: string;
   loggedIn: boolean;
-  userInfo: userInfo | null;
+  userUpdate: userInfo | null;
 }
 export const userInfoFromStorage: userInfo =
   localStorage.getItem("userInfo") ?
@@ -30,14 +30,23 @@ const initialState = {
   isSuccess: false,
   loggedIn: false,
   message: null,
-  userInfo: userInfoFromStorage || null,
+  userUpdate: userInfoFromStorage || null,
 };
+interface FetchUserParams {
+  email: string;
+  password: string;
+  name?: string
+}
 
-export const loginAccount = createAsyncThunk(
-  "users/login",
-  async (account: { email: string; password: string }, thunkAPI) => {
+
+
+export const updateUserProfile = createAsyncThunk(
+  "createAccount/post",
+  async (account: userInfo, thunkAPI) => {
+    console.log(account)
     try {
-      const data = await UsersService.login(account);
+      const token = thunkAPI.getState().users.userInfo.token;
+      const data = await UserProfileService.updateUser(account, token);
       console.log(data);
       return data;
     } catch (error: any) {
@@ -46,49 +55,39 @@ export const loginAccount = createAsyncThunk(
     }
   }
 );
-
-  
-
-  
-   
-export const UsersSlice = createSlice({
+export const UserProfileSlice = createSlice({
   name: "user",
   // `createSlice` will infer the state type from the `initialState` argument
   initialState ,
   reducers: {
-    logoutAccount(state) {
-      state.userInfo = null;
-      localStorage.removeItem("userInfo");
-      localStorage.removeItem('shippingAddress')
-      localStorage.removeItem('paymentMethod')
-      localStorage.removeItem('cartItems')
-      // document.location.href = '/login'
-    },
+    resetUpdateUser: (state, action: PayloadAction<userInfo>) => {
+      state.userUpdate = action.payload;
+
+    }
   },
   extraReducers: (builder) => {
     builder
-      .addCase(loginAccount.pending, (state) => {
+      .addCase( updateUserProfile.pending, (state) => {
         state.isLoading = true;
       })
-      .addCase(loginAccount.fulfilled, (state, action: PayloadAction<any>) => {
+      .addCase( updateUserProfile.fulfilled, (state, action: PayloadAction<userInfo>) => {
         state.isLoading = false;
-        state.userInfo = action.payload;
-        localStorage.setItem("userInfo", JSON.stringify(state.userInfo));
+        state.userUpdate = action.payload;
         state.isSuccess = true
       })
-      .addCase(loginAccount.rejected, (state, action: PayloadAction<any>) => {
+      .addCase( updateUserProfile.rejected, (state, action: PayloadAction<any>) => {
         state.isLoading = false;
         // state.isError = true;
         // state.message = action.payload;
-      })
- 
+      });
      
   },
 });
 
-export const { logoutAccount } = UsersSlice.actions;
+export const { resetUpdateUser } = UserProfileSlice.actions;
+
 
 // Other code such as selectors can use the imported `RootState` type
-export const userLogin = (state: RootState) => state.users;
+export const userUpdateProfile = (state: RootState) => state.userProfile;
 
-export default UsersSlice.reducer;
+export default UserProfileSlice.reducer;

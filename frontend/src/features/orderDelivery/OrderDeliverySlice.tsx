@@ -2,7 +2,8 @@ import type { PayloadAction } from "@reduxjs/toolkit";
 import type { RootState } from "../../store";
 import { IProduct, productsList } from "../../products";
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import OrderService from "./OrderService";
+import OrderDeliveryService from "./OrderDeliveryService";
+import { AppDispatch } from "../../store";
 // import { extractErrorMessage } from '../../utils'
 
 // Define a type for the slice state
@@ -27,7 +28,12 @@ export interface IOrderItem {
       _id: string
   }
 }
-
+export interface userInfo {
+  _id: string;
+  name: string;
+  isAdmin?: boolean;
+  email: string;
+}
 export interface IInitialOrder {  
   
       orderItems: IOrderItem[] | [];
@@ -37,31 +43,36 @@ export interface IInitialOrder {
         postalCode: string;
         country: string;
       } | null;
+      user: userInfo,
       paymentMethod: string | null;
       itemsPrice: number | null;
       shippingPrice: number | null;
       taxPrice: number | null;
-      totalPrice: number | null; 
-      paidAt?:string,
-      user?: string,
-      isPaid?: boolean,
-      isDelivered?: boolean,
-      _id?: string,
+      totalPrice: number | null;
+      isPaid: boolean,
+      isDelivered: boolean,
+      _id: string,
     };
- 
+  
 export interface IInitialOrderState {   
   order: IInitialOrder| null
-  success: boolean;
-  error: string;
- 
+  isSuccess: boolean;
+  isError: boolean;
+  isLoading: boolean;
+
 }
+
+
+    
 export type AppThunk<ReturnType = void> = (thunkAPI: ThunkAPI) => ReturnType;
 
 
-const initialState: IInitialOrderState= {  
+const initialState: IInitialOrderState = {  
   order: null,
-  success: false,
-  error: "",
+  isSuccess: false,
+  isError: false,
+  isLoading: false
+
 };
 type Dispatch = /*unresolved*/ any;
 interface ThunkAPI {
@@ -69,45 +80,47 @@ interface ThunkAPI {
   getState: () => RootState;
 }
 
-export const createOrder = createAsyncThunk<
-  AppThunk<{ orderDispatch: IInitialOrder; qty: number }>
->("createOrder/post", async ({ orderDispatch }, thunkAPI) => {
-  console.log("orderdispatch",orderDispatch)
+export const putDeliveryOrder = createAsyncThunk<
+  AppThunk<{ order: IInitialOrder}>
+>("putOrderDelivery/put", async ({ order }, thunkAPI) => {
   try {
     const token = thunkAPI.getState().users.userInfo.token;
-    const data = await OrderService.createOrder(orderDispatch, token);
-
+    const data = await OrderDeliveryService.putDeliveryOrder(order, token);
+  
+console.log(data)
     return data;
   } catch (error) {
-
-    return thunkAPI.rejectWithValue(error);
+    console.log(error);
+    // return thunkAPI.rejectWithValue(error.message);
   }
 });
 
-export const OrderSlice = createSlice({
-  name: "order/create",
+export const OrderDeliverySlice = createSlice({
+  name: "orderDetails",
   initialState,
-  reducers: {},
+  reducers: {
+    orderDeliverReset: (state) =>{}
+  },
   extraReducers: (builder) => {
     builder
-      .addCase(createOrder.fulfilled, (state, action: PayloadAction<any>) => {
-        console.log(action.payload)
-        state.success = true
+      .addCase(putDeliveryOrder.pending, (state) => {})
+      .addCase(putDeliveryOrder.fulfilled, (state, action: PayloadAction<any>) => {
         state.order = action.payload;
-        
-
+        state.isLoading = false;
+        state.isSuccess = true
       })
-      .addCase(createOrder.rejected, (state, action: PayloadAction<any>) => {
-        
-
+      .addCase(putDeliveryOrder.rejected, (state, action: PayloadAction<any>) => {
+  
+        state.isSuccess = false;
+        state.isError = action.payload;
       });
   },
 });
 
-export const {} = OrderSlice.actions;
+export const {orderDeliverReset} = OrderDeliverySlice.actions;
 
 // Other code such as selectors can use the imported `RootState` type
-export const selectOrder = (state: RootState) => state.order;
+export const orderDeliveryInfo = (state: RootState) => state.orderDelivery;
 // export const productDetails = (state: RootState) => state.products.product;
 
-export default OrderSlice.reducer;
+export default OrderDeliverySlice.reducer;

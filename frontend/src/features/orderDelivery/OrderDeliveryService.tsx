@@ -20,12 +20,12 @@ export interface IInitialOrder {
     shippingPrice: number | null;
     taxPrice: number | null;
     totalPrice: number | null;
+    _id: string
   };
 
 
 
-const createOrder = async (orderDispatch: IInitialOrder, token: string) => {
-    console.log(orderDispatch)
+const putDeliveryOrder = async ( order:IInitialOrder, token: string) => {
     const config = {
         headers: {
           'Content-Type': 'application/json',
@@ -33,19 +33,16 @@ const createOrder = async (orderDispatch: IInitialOrder, token: string) => {
         },
       }
 
-  const { data } = await axios.post(`${API_URL}`, orderDispatch, config)
+  const { data } = await axios.put(`${API_URL}${order._id}/deliver`, order.shippingAddress,config)
   
   return data;
 
 };
 
 
-const OrderService = {
-  createOrder,
-  // getCart,
-  // getItemCart,
-  // // closeProduct,
-  // deleteItemCart,
+const OrderDeliveryService = {
+ putDeliveryOrder
+
 };
 
-export default OrderService;
+export default OrderDeliveryService;

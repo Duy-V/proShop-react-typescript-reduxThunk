@@ -6,6 +6,12 @@ import { productsList, IProduct } from "../../products";
 interface FetchProductParams {
   productId: number;
 }
+interface payment {
+  id: string,
+  status: string,
+  update_time: string,
+  email_address: string,
+}
 export interface IInitialOrder {  
   
     orderItems: IProduct[] | [];
@@ -20,32 +26,33 @@ export interface IInitialOrder {
     shippingPrice: number | null;
     taxPrice: number | null;
     totalPrice: number | null;
+    _id: string | null
   };
 
 
 
-const createOrder = async (orderDispatch: IInitialOrder, token: string) => {
-    console.log(orderDispatch)
+const putOrderPay = async ( orderId: string,  paymentResultDispatch: payment,token: string) => {
     const config = {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`,
         },
       }
+  console.log("orderPaysService111",orderId, paymentResultDispatch)
 
-  const { data } = await axios.post(`${API_URL}`, orderDispatch, config)
-  
-  return data;
+  const { data } = await axios.put(
+    `${API_URL}${orderId}/pay`,
+    paymentResultDispatch,
+    config
+  )
+  console.log(data.payer)
+  return data.payer;
 
 };
 
 
-const OrderService = {
-  createOrder,
-  // getCart,
-  // getItemCart,
-  // // closeProduct,
-  // deleteItemCart,
+const OrderPayService = {
+  putOrderPay,
 };
 
-export default OrderService;
+export default OrderPayService;
